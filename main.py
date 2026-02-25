@@ -1,12 +1,15 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from itsdangerous import URLSafeSerializer, BadSignature
-import bcrypt, sqlite3
+import bcrypt, sqlite3, os
 
 app    = FastAPI()
 SECRET = "change-this-secret-key"
 signer = URLSafeSerializer(SECRET)
-DB     = "app.db"
+
+# Always find files relative to THIS file, not where the server is run from
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB       = os.path.join(BASE_DIR, "app.db")
 
 # ── Database setup ───────────────────────────────────────
 def get_db():
@@ -38,7 +41,8 @@ init_db()
 
 # ── Helpers ──────────────────────────────────────────────
 def read_html(filename: str) -> str:
-    with open(f"static/{filename}", "r") as f:
+    path = os.path.join(BASE_DIR, "static", filename)
+    with open(path, "r") as f:
         return f.read()
 
 def set_session(response, user_id: int, username: str):
